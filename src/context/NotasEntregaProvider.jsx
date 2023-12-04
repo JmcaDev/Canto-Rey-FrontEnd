@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, createContext } from "react";
+import { useState, useEffect, createContext } from "react";
 import {useNavigate} from "react-router-dom"
 import clienteAxios from "../config/clienteAxios";
 import PropTypes from "prop-types"
@@ -8,9 +8,13 @@ const NotasEntregaContext = createContext();
 const NotasEntregaProvider = ({children}) => {
 
     const [notasEntrega, setNotasEntrega] = useState([])
+
     const [clientes, setClientes] = useState([])
     const [cliente, setCliente] = useState({})
+
     const [productos, setProductos] = useState([])
+    const [producto, setProducto] = useState({})
+
     const [alerta, setAlerta] = useState({})
 
     const [cargando, setCargando] = useState(false)
@@ -205,8 +209,37 @@ const NotasEntregaProvider = ({children}) => {
         }
     }
 
+    const obtenerProducto = async (id) => {
+        setCargando(true)
+
+        try {
+            const token = localStorage.getItem("token")
+            if(!token)return
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            } 
+
+            const {data} = await clienteAxios(`productos/${id}`, config)
+            setProducto(data)
+        } catch (error) {
+            console.log(error)
+        }finally{
+            setCargando(false)
+        }
+    }
     const submitProducto = async producto => {
-        try{
+        if(producto.id){
+            await editarProducto(producto)
+        }else{
+            await nuevoProducto(producto)
+        }
+    }
+
+    const editarProducto = async producto => {
+        try {
             const token = localStorage.getItem("token")
             if(!token)return
             const config = {
@@ -216,20 +249,85 @@ const NotasEntregaProvider = ({children}) => {
                 }
             }
 
-            const {data} = await clienteAxios.post("/productos", producto, config)
+            const {data} = await clienteAxios.put(`/productos/${producto.id}`, producto,config)
+
+            //Sincronizar el state
+            const productosActualizados = productos.map((productoState) => productoState._id === data._id ? data : productoState)
+            setProductos(productosActualizados)
+
+            //Mostrar la alerta
+            setAlerta({
+                msg: "Producto Actualizado correctamente",
+                error: false
+            })
+
+            setTimeout(() => {
+                setAlerta({})
+                navigate("/index/productos")
+            },3000)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const nuevoProducto = async producto => {
+        try {
+            const token = localStorage.getItem("token")
+            if(!token)return
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
+            const {data} = await clienteAxios.post(`/productos/${producto.id}`, producto,config)
             setProductos([...productos, data])
+            
+
+            //Mostrar la alerta
+            setAlerta({
+                msg: "Producto agregado correctamente",
+                error: false
+            })
+
+            setTimeout(() => {
+                setAlerta({})
+                navigate("/index/productos")
+            },3000)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const eliminarProducto = async id => {
+        try {
+            const token = localStorage.getItem("token")
+            if(!token)return
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
+            const {data} = await clienteAxios.delete(`/productos/${id}`, config)
+
+            //Sincronizar el state
+            const productosActualizados = productos.filter(productosState => productosState._id !== id)
+            setProductos(productosActualizados)
 
             setAlerta({
-                msg:"Producto agregado exitosamente",
+                msg: data.msg,
                 error: false
             })
 
             setTimeout(()=> {
                 setAlerta({})
-                navigate("index/productos")
+                navigate("/index/productos")
             }, 3000)
 
-        }catch(error){
+        } catch (error) {
             console.log(error)
         }
     }
@@ -240,13 +338,16 @@ const NotasEntregaProvider = ({children}) => {
                 notasEntrega,
                 cliente,
                 clientes,
+                obtenerCliente,
                 submitCliente,
                 eliminarCliente,
                 productos,
-                mostrarAlerta,
-                alerta,
-                obtenerCliente,
+                producto,
+                obtenerProducto,
                 submitProducto,
+                eliminarProducto,
+                alerta,
+                mostrarAlerta,
                 cargando
             }}
         >{children}</NotasEntregaContext.Provider>

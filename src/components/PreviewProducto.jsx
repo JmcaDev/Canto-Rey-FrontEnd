@@ -20,3 +20,7 @@ function PreviewProducto({producto}) {
 }
 
 export default PreviewProducto
+
+PreviewProducto.propTypes = {
+  producto: PropTypes.object
+}

@@ -1,12 +1,23 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import useNotas from "../hooks/useNotas"
 import Alerta from "./Alerta"
+import { useParams } from "react-router-dom"
 
 function FormularioProducto() {
 
-  const {mostrarAlerta, alerta, submitProducto} = useNotas()
+  const {mostrarAlerta, alerta, submitProducto, producto} = useNotas()
 
+  const [id, setId] = useState(null)
   const [nombre, setNombre] = useState("")
+
+  const params = useParams()
+
+  useEffect(()=> {
+    if(producto.nombre){
+      setId(producto._id)
+      setNombre(producto.nombre)
+    }
+  }, [params])
 
   const handleSubmit = async e => {
     e.preventDefault()
@@ -20,8 +31,9 @@ function FormularioProducto() {
     }
 
     //Pasar los datos al provider
-    await submitProducto({nombre})
+    await submitProducto({id, nombre})
 
+    setId(null)
     setNombre("")
   }
 
@@ -52,7 +64,7 @@ function FormularioProducto() {
 
       <input 
         type="submit" 
-        value="Añadir producto" 
+        value={id ? "Actualizar Producto": "Crear Producto"} 
         className="bg-sky-600 w-full p-3 uppercase font-bold text-white cursor-pointer hover:bg-sky-800 transition-colors"
       />
     </form>
