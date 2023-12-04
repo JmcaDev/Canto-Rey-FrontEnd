@@ -21,9 +21,10 @@ import NuevoCliente from "./paginas/NuevoCliente"
 import EditarCliente from "./paginas/EditarCliente"
 
 
-import NuevoProducto from "./paginas/NuevoProducto"
 import Productos from "./paginas/Productos"
 import Producto from "./paginas/Producto"
+import NuevoProducto from "./paginas/NuevoProducto"
+import EditarProducto from "./paginas/EditarProducto"
 
 function App() {
 
@@ -53,6 +54,7 @@ function App() {
               <Route path="productos" element={<Productos/>} />
               <Route path="productos/crear-producto" element={<NuevoProducto/>}/>
               <Route path="productos/:id" element={<Producto/>}/>
+              <Route path="productos/editar/:id" element={<EditarProducto/>}/>
             </Route>
           </Routes>
         </NotasEntregaProvider>

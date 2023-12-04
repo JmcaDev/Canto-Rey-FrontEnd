@@ -7,6 +7,7 @@ function FormularioCliente() {
 
   const {mostrarAlerta, alerta, submitCliente, cliente} = useNotas()
 
+  const [id,setId] = useState(null)
   const [nombre,setNombre] = useState("")
   const [rif,setRif] = useState("")
   const [direccion,setDireccion] = useState("")
@@ -15,6 +16,7 @@ function FormularioCliente() {
 
   useEffect(()=> {
     if(cliente.nombre){
+      setId(cliente._id)
       setNombre(cliente.nombre)
       setRif(cliente.rif)
       setDireccion(cliente.direccion)
@@ -34,8 +36,9 @@ function FormularioCliente() {
     }
 
     //Pasar los datos al provider
-    await submitCliente({nombre, rif,direccion,telefono})
+    await submitCliente({id,nombre, rif,direccion,telefono})
 
+    setId(null)
     setNombre("")
     setRif("")
     setDireccion("")
@@ -119,7 +122,7 @@ function FormularioCliente() {
 
       <input 
         type="submit" 
-        value="Añadir Cliente"
+        value={id ? "Actualizar Cliente" : "Crear cliente"}
         className="bg-sky-600 w-full p-3 uppercase font-bold text-white rounded cursor-pointer hover:bg-sky-800 transition-colors"
       />
     </form>

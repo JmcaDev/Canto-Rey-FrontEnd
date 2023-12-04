@@ -71,6 +71,53 @@ const NotasEntregaProvider = ({children}) => {
     }, [])
 
     const submitCliente = async cliente => {
+
+        if(cliente.id){
+            await editarCliente(cliente)
+        }else{
+            await nuevoCliente(cliente)
+        }
+
+        return
+    }
+
+    const editarCliente = async cliente => {
+        try {
+            const token = localStorage.getItem("token")
+            if(!token)return
+
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
+            const { data } = await clienteAxios.put(`/clientes/${cliente.id}`, cliente, config)
+
+            //Sincronizar el state
+            const clientesActualizados = clientes.map((clienteState) => clienteState._id === data._id ? data : clienteState)
+            setClientes(clientesActualizados)
+
+
+            //Mostrar la alerta
+            setAlerta({
+                msg: "Cliente actualizado correctamente",
+                error: false
+            })
+
+            setTimeout(()=> {
+                setAlerta({})
+                navigate("/index/clientes")
+            }, 3000)
+
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const nuevoCliente = async cliente => {
         try {
             const token = localStorage.getItem("token")
             if(!token)return
@@ -98,6 +145,63 @@ const NotasEntregaProvider = ({children}) => {
 
         } catch (error) {
             console.log(error)
+        }   
+    }
+
+    const eliminarCliente = async id => {
+        try {
+            const token = localStorage.getItem("token")
+            if(!token)return
+
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
+            const {data} = await clienteAxios.delete(`/clientes/${id}`, config)
+
+            //Sincronizar el state
+            const clientesActualizados = clientes.filter(clientesState => clientesState._id !== id)
+            setClientes(clientesActualizados)
+
+            setAlerta({
+                msg: data.msg,
+                error:false
+            })
+
+            setTimeout(()=> {
+                setAlerta({})
+                navigate("/index/clientes")
+            },3000)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+ 
+    const obtenerCliente = async (id) => {
+
+        setCargando(true)
+
+        try {
+            const token = localStorage.getItem("token")
+            if(!token)return
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+
+            const {data} = await clienteAxios(`/clientes/${id}`, config)
+            setCliente(data)
+
+        } catch (error) {
+            console.log(error)
+        }finally{
+            setCargando(false)
         }
     }
 
@@ -130,41 +234,17 @@ const NotasEntregaProvider = ({children}) => {
         }
     }
 
-    const obtenerCliente = async (id) => {
-
-        setCargando(true)
-
-        try {
-            const token = localStorage.getItem("token")
-            if(!token)return
-            const config = {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            }
-
-            const {data} = await clienteAxios(`/clientes/${id}`, config)
-            setCliente(data)
-
-        } catch (error) {
-            console.log(error)
-        }finally{
-            setCargando(false)
-        }
-    }
-
-
     return (
         <NotasEntregaContext.Provider
             value={{
                 notasEntrega,
-                clientes,
                 cliente,
+                clientes,
+                submitCliente,
+                eliminarCliente,
                 productos,
                 mostrarAlerta,
                 alerta,
-                submitCliente,
                 obtenerCliente,
                 submitProducto,
                 cargando
