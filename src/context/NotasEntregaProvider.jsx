@@ -8,6 +8,8 @@ const NotasEntregaContext = createContext();
 const NotasEntregaProvider = ({children}) => {
 
     const [notasEntrega, setNotasEntrega] = useState([])
+    const [productosVenta, setProductosVenta] = useState([])
+    const [productoVenta, setProductoVenta] = useState({})
 
     const [clientes, setClientes] = useState([])
     const [cliente, setCliente] = useState({})
@@ -18,6 +20,8 @@ const NotasEntregaProvider = ({children}) => {
     const [alerta, setAlerta] = useState({})
 
     const [cargando, setCargando] = useState(false)
+
+    const [modalFormularioNota, setModalFormularioNota] = useState(false)
 
     const navigate = useNavigate()
 
@@ -332,6 +336,10 @@ const NotasEntregaProvider = ({children}) => {
         }
     }
 
+    const handleModalNota = () => {
+        setModalFormularioNota(!modalFormularioNota)
+    }
+
     return (
         <NotasEntregaContext.Provider
             value={{
@@ -348,7 +356,13 @@ const NotasEntregaProvider = ({children}) => {
                 eliminarProducto,
                 alerta,
                 mostrarAlerta,
-                cargando
+                cargando,
+                modalFormularioNota,
+                handleModalNota,
+                productoVenta,
+                setProductoVenta,
+                productosVenta,
+                setProductosVenta
             }}
         >{children}</NotasEntregaContext.Provider>
     )
