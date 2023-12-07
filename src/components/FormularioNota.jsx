@@ -1,17 +1,54 @@
 import useNotas from "../hooks/useNotas"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import ModalProducto from "./ModalProducto"
+import PreviewProductoVenta from "./PreviewProductoVenta"
+import Alerta from "./Alerta"
 
 function FormularioNota() {
 
-  const {clientes, handleModalNota, productosVenta} = useNotas()
+  const {clientes, handleModalNota, productosVenta, mostrarAlerta, alerta, submitNota} = useNotas()
 
   const [clienteSeleccionado, setClienteSeleccionado] = useState({})
-  
   const [modal, setModal] = useState(false)
 
+  const [precioTotal, setPrecioTotal] = useState(0)
+
+  useEffect(() => {
+    let resultado = 0
+    productosVenta.map(producto => {
+      resultado = resultado + producto.montoProducto
+    })
+    setPrecioTotal(resultado)
+  }, [productosVenta])
+
+  const handleSubmitNota = async (e) => {
+    e.preventDefault()
+    
+    if(clienteSeleccionado === "null"){
+      mostrarAlerta({
+        msg: "Seleccione un cliente valido",
+        error: true
+      })
+      return
+    }
+
+    if(productosVenta.length == 0){
+      mostrarAlerta({
+        msg: "Debe ingresar algun producto",
+        error: true
+      })
+    }
+
+    await submitNota({cliente: clienteSeleccionado, productos: productosVenta, montoTotal: precioTotal})
+    
+  }
+
+  const {msg} = alerta
+
   return (
-    <form className="bg-white py-10 px-5 md:w-1/2 rounded-lg">
+    <form className="bg-white py-10 px-5 md:w-4/5 rounded-lg">
+
+        {msg && <Alerta alerta={alerta}/>}
         <div>
             <label htmlFor="" 
               className="text-gray-700 uppercase font-bold text-sm"
@@ -23,6 +60,7 @@ function FormularioNota() {
               value={clienteSeleccionado}
               onChange={e => setClienteSeleccionado(e.target.value)}
             >
+              <option value="null">-- Seleccione un cliente --</option>
               {clientes.length ? 
                 (clientes.map(cliente => (
                   <option value={cliente._id} key={cliente._id}>{cliente.nombre}</option>
@@ -52,7 +90,22 @@ function FormularioNota() {
               modal={modal}
               setModal = {setModal}
             />
-        </div>      
+        </div>
+
+        <div className="mt-2 border-t-2">
+            {productosVenta.length ? (
+                productosVenta.map((producto) => (
+                  <PreviewProductoVenta key={producto.id} producto={producto}/>
+                ))
+              ) : "No hay productos"}
+        </div>
+            
+        <div className="flex justify-around">
+          <h1 className="uppercase font-bold">Precio a pagar</h1>
+          <p className="font-bold">{precioTotal}$</p>
+        </div>
+
+        <button className="" onClick={handleSubmitNota}>Generar Nota de Entrega</button>
     </form>
   )
 }

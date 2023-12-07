@@ -6,20 +6,30 @@ import Alerta from './Alerta'
 const ModalProducto = () => {
  
     const [idProducto, setIdProducto] = useState("")
+    const [nombreProducto, setNombreProducto] = useState("")
     const [cantKg, setCantKg] = useState(1)
     const [precioKg, setPrecioKg] = useState(1)
     const [montoProducto, setMontoProducto] = useState(null)
-
-    const {handleModalNota, modalFormularioNota, productos, setProductosVenta, productosVenta,productoVenta, setProductoVenta, alerta, mostrarAlerta} = useNotas()
+    const {handleModalNota, modalFormularioNota, productos, agregarProductosVenta, setProductoVenta, productoVenta, alerta, mostrarAlerta} = useNotas()
 
     useEffect(() => {
         setMontoProducto(parseFloat(cantKg) * parseFloat(precioKg))
     }, [cantKg,precioKg])
 
+    const generarId = () => {
+        return Math.random().toString(30).substring(2)
+    }
+
+    const seleccionarProducto = e => {
+        setIdProducto(e.target.value)
+        let combo = document.getElementById("producto")
+        let selected = combo.options[combo.selectedIndex].text
+        setNombreProducto(selected)
+    }
+
     const handleSubmit = async (e) => {
+        let id = generarId()
         e.preventDefault()
-        
-        return
         if(idProducto === "null" || idProducto === ""){
             mostrarAlerta({
                 msg: "Introduzca un producto valido",
@@ -36,10 +46,21 @@ const ModalProducto = () => {
             return
         }
 
-        setProductoVenta({idProducto, cantKg, precioKg, montoProducto})
-        setProductosVenta([...productosVenta, productoVenta])
+        setProductoVenta({idProducto,id, nombreProducto,cantKg, precioKg, montoProducto})
+        id = ""
+        setIdProducto("")
+        setCantKg(1)
+        setPrecioKg(1)
+        setMontoProducto(null)
+
         handleModalNota()
+        
     }
+
+    useEffect(() =>{
+        agregarProductosVenta(productoVenta)
+    }, [productoVenta])
+
 
     const {msg} = alerta
 
@@ -110,11 +131,11 @@ const ModalProducto = () => {
                                                 id="producto"
                                                 className='border-2 w-full p-2 mt-2 placeholder-gray-400 rounded-md uppercase'
                                                 value={idProducto}
-                                                onChange={e => setIdProducto(e.target.value)}
+                                                onChange={seleccionarProducto}
                                             >
                                                 <option value="null" > --Seleccione un producto-- </option>
                                                 {productos.length ? (productos.map(producto => (
-                                                    <option value={producto._id} key={producto._id}>{producto.nombre}</option>
+                                                    <option value={producto._id} key={producto._id} >{producto.nombre}</option>
                                                 ))) : <p>No hay productos</p>}
                                             </select>
                                         </div>

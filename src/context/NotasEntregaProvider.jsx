@@ -340,6 +340,40 @@ const NotasEntregaProvider = ({children}) => {
         setModalFormularioNota(!modalFormularioNota)
     }
 
+    const agregarProductoVenta = (id, cant, precio, monto) => {
+        setProductoVenta({id, cant, precio, monto})
+    }
+
+    const agregarProductosVenta = (productoV) => {
+        if(Object.keys(productoV).length === 0){
+            return
+        }
+
+        if(productosVenta.length === 0){
+            setProductosVenta([productoV])
+        }else{
+            setProductosVenta([...productosVenta, productoV])
+        }
+    }
+
+    const submitNota = async (nota) => {
+        try {
+            const token = localStorage.getItem("token")
+            if(!token)return
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            }
+            console.log(nota)
+            const {data} = await clienteAxios.post(`/notasentregas`, nota, config)
+            console.log(data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     return (
         <NotasEntregaContext.Provider
             value={{
@@ -362,7 +396,10 @@ const NotasEntregaProvider = ({children}) => {
                 productoVenta,
                 setProductoVenta,
                 productosVenta,
-                setProductosVenta
+                setProductosVenta,
+                agregarProductoVenta,
+                agregarProductosVenta,
+                submitNota
             }}
         >{children}</NotasEntregaContext.Provider>
     )
