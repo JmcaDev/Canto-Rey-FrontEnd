@@ -6,7 +6,7 @@ import Alerta from "./Alerta"
 
 function FormularioNota() {
 
-  const {clientes, handleModalNota, productosVenta, mostrarAlerta, alerta, submitNota} = useNotas()
+  const {clientes, handleModalNota, productosVenta, mostrarAlerta, setProductosVenta,alerta, submitNota} = useNotas()
 
   const [clienteSeleccionado, setClienteSeleccionado] = useState({})
   const [modal, setModal] = useState(false)
@@ -40,7 +40,8 @@ function FormularioNota() {
     }
 
     await submitNota({cliente: clienteSeleccionado, productos: productosVenta, montoTotal: precioTotal})
-    
+    setPrecioTotal(0)
+    setProductosVenta([])
   }
 
   const {msg} = alerta
